@@ -2102,11 +2102,13 @@ function updateData( data ) {
 		data = oldData;
 	}
 
+  console.warn(data.score_history)
+
 	// Update the streaks/point bar
 	var streakMaxWidth = 227,
 
 		// Streak and longest streak pixel widths
-		streakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_streak) * data.streak)),
+		streakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_score) * data.score)),
 		longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_streak) * data.longest_streak)),
 
 		// Streak icon pixel width
@@ -2118,7 +2120,7 @@ function updateData( data ) {
 		// Don't show accumulation stats higher than 100 to stop grinding behavior,
 		// and don't show labels if there isn't room in the bar to render them.
 		labelStreak = streakWidth < labelWidthRequired ? "" :
-						( !data.summative && data.streak > 100 ) ? "Max" : data.streak,
+						( !data.summative && data.streak > 100 ) ? "Max" : data.score,
 
 		labelLongestStreak = ( longestStreakWidth < labelWidthRequired || (longestStreakWidth - streakWidth) < labelWidthRequired ) ? "" :
 						( !data.summative && data.longest_streak > 100 ) ? "Max" : data.longest_streak;
