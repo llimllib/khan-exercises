@@ -2149,18 +2149,20 @@ function updateData( data ) {
 
 		}
 	}
-	
+
 	if(!jQuery.sparkline){
-		Khan.loadScripts([{src : "/javascript/jquery.sparkline.min.js"}],function(){
-			jQuery(".streak-bar").sparkline(data.score_history, { height:26 })		  
+		Khan.loadScripts([{src : urlBase + "utils/jquery.sparkline.js"}],function(){
+			if(data.score_history){
+				jQuery(".streak-bar").sparkline(data.score_history, { height:26, defaultPixelsPerValue:5, lineColor:"#aaa", fillColor:false, spotColor:"#82" })
+			}
 		})
 	}
 
-  // jQuery(".unit-rating").width( streakMaxWidth );
-  // jQuery(".current-rating").width( streakWidth );
-  // jQuery(".streak-icon").width( streakIconWidth );
-  // jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
-  // jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
+	jQuery(".unit-rating").width( streakMaxWidth );
+	jQuery(".current-rating").width( streakWidth );
+	jQuery(".streak-icon").width( streakIconWidth );
+	jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
+	jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
 	jQuery("#exercise-points").text( " " + data.next_points + " " );
 
 	// Update the exercise icon
