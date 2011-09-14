@@ -2166,23 +2166,23 @@ function updateData( data ) {
 			updateStreak = function(){
 				console.log(data.score_history, data);
 				if(data.score_history){
+					// TODO these two sparklines are effectively the same, so maybe
+					// we can reuse the object we pass in rather than literaling it
 					jQuery(".streak-bar").sparkline(data.score_history, 
 						{ "height":30, 
 							"width": jQuery(".streak-bar").css("width"),
 							"defaultPixelsPerValue" : 10, 
 							"lineColor" : "#888", 
-							"chartRangeMax" : 100,
+							"chartRangeMax" : data.required_score,
 							"fillColor" : false, 
 							"spotColor" : "#0e2", 
 							"maxSpotColor" : "#0e2", 
 							"minSpotColor" : "#ccc" });
 					
-					var finishLine = [[0,100], [data.score_history.length, 100]];
-					var max,
-							scores = jQuery.extend(true, [], data.score_history);
-					scores.sort(function(a,b){return b-a;});
-					max = scores[0];
-					finishLineColor = (max > 100) ? "#1d0" : "#d00";
+					var finishLine = [[0,100], [data.score_history.length, data.required_score]];
+					
+					var max = Math.max.apply(null, data.score_history);
+					finishLineColor = (max >= data.required_score) ? "#1d0" : "#d00";
 					for(var i = 0; i < data.score_history.length; i += 1){ 
 						max = (data.score_history[i] >= max) ? data.score_history[i] : max;
 					} 
@@ -2209,19 +2209,28 @@ function updateData( data ) {
 			}
 		}
 		if(data.streak_display === "vehicle"){
-			console.log('nothing here compadre');
+			maxScore = Math.max.apply(null, data.score_history)
+			streakIconWidth = "13px"; streakIconHeight = "28px";
+			streakFlagColor = maxScore >= 100 ? "#0098d0" : "#6abd45";
+			jQuery(".streak-icon").css( {
+				"background-color" : streakFlagColor,
+				"width" : streakIconWidth,
+				"height" : streakIconHeight } );
+			streakMaxWidth -= 30;
+			longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth)),
+			jQuery(".best-label").css({ "width":"29px", "left": longestStreakWidth }).html(labelLongestStreak);
 		}
 	} else {
 		console.log( "streak_display not configured here, but maybe some day...", data);
+		jQuery(".unit-rating").width( streakMaxWidth );
+		jQuery(".current-rating").width( streakWidth );
+		jQuery(".streak-icon").width( streakIconWidth );
+		jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
+		jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
 		
 	}
 
 
-	jQuery(".unit-rating").width( streakMaxWidth );
-	jQuery(".current-rating").width( streakWidth );
-	jQuery(".streak-icon").width( streakIconWidth );
-	jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
-	jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
 	jQuery("#exercise-points").text( " " + data.next_points + " " );
 
 	// Update the exercise icon
