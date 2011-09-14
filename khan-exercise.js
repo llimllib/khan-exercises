@@ -2088,6 +2088,7 @@ function request( method, data, fn, fnError ) {
 }
 
 // Update the visual representation of the points/streak
+// only works when running in a gae environment
 function updateData( data ) {
 	// Check if we're setting/switching usernames
 	if ( data ) {
@@ -2110,8 +2111,6 @@ function updateData( data ) {
 	} else {
 		data = oldData;
 	}
-
-  console.warn(data.score_history)
 
 	// Update the streaks/point bar
 	var streakMaxWidth = 227,
@@ -2137,7 +2136,7 @@ function updateData( data ) {
 	if ( data.summative ) {
 
 		jQuery( ".summative-help ")
-			.find( ".summative-required-streaks" ).text( parseInt( data.required_streak / 10 ) ).end()
+			.find( ".summative-required-streaks" ).text( parseInt( data.required_streak / 10 , 10 ) ).end()
 			.show();
 
 		if ( jQuery( ".level-label" ).length === 0 ) {
@@ -2158,14 +2157,66 @@ function updateData( data ) {
 
 		}
 	}
-
-	if(!jQuery.sparkline){
-		Khan.loadScripts([{src : urlBase + "utils/jquery.sparkline.js"}],function(){
-			if(data.score_history){
-				jQuery(".streak-bar").sparkline(data.score_history, { height:26, defaultPixelsPerValue:5, lineColor:"#aaa", fillColor:false, spotColor:"#82" })
+	
+	if( data.hasOwnProperty("streak_display") ){
+		// assign the streak bar a class appropriate to the display mode
+		jQuery(".streak-bar").addClass(data.streak_display);
+		
+		if(data.streak_display === "sparkline"){
+			updateStreak = function(){
+				console.log(data.score_history, data);
+				if(data.score_history){
+					var max = $.map(data.score_history, function(){})
+					jQuery(".streak-bar").sparkline(data.score_history, 
+						{ "height":30, 
+							"width": jQuery(".streak-bar").css("width"),
+							"defaultPixelsPerValue" : 10, 
+							"lineColor" : "#888", 
+							"chartRangeMax" : 100,
+							"fillColor" : false, 
+							"spotColor" : "#0e2", 
+							"maxSpotColor" : "#0e2", 
+							"minSpotColor" : "#ccc" });
+					
+					var finishLine = [[0,100], [data.score_history.length, 100]];
+					var max;
+					var scores = jQuery.extend(true, [], data.score_history)
+					scores.sort(function(a,b){return b-a;});
+					max = scores[0];
+					finishLineColor = (max > 100) ? "#1d0" : "#d00";
+					for(var i = 0; i < data.score_history.length; i += 1){ 
+						max = (data.score_history[i] > max) ? data.score_history[i] : max;
+					} 
+					
+					jQuery(".streak-bar").sparkline( finishLine,
+						{ "height" : 30, 
+							"width": jQuery(".streak-bar").css("width"),
+							"composite" : true,
+							"defaultPixelsPerValue" : 10, 
+							"lineColor" : finishLineColor, 
+							"chartRangeMax" : max,
+							"chartRangeMin" : 0,
+							"fillColor" : false, 
+							"spotColor" : false, 
+							"maxSpotColor" : false, 
+							"minSpotColor" : false });
+				}
+			};
+			
+			if(!jQuery.fn.sparkline){
+				Khan.loadScripts([{src : urlBase + "utils/jquery.sparkline.js"}],updateStreak);
+			} else {
+				updateStreak();
 			}
-		})
+		}
+		if(data.streak_display === "vehicle"){
+			console.log('nothing here compadre');
+		}
+	} else {
+		console.log( "streak_display not configured here, but maybe some day...", data);
+		
 	}
+
 
 	jQuery(".unit-rating").width( streakMaxWidth );
 	jQuery(".current-rating").width( streakWidth );
