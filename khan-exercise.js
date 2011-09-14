@@ -2166,7 +2166,6 @@ function updateData( data ) {
 			updateStreak = function(){
 				console.log(data.score_history, data);
 				if(data.score_history){
-					var max = $.map(data.score_history, function(){})
 					jQuery(".streak-bar").sparkline(data.score_history, 
 						{ "height":30, 
 							"width": jQuery(".streak-bar").css("width"),
@@ -2179,13 +2178,13 @@ function updateData( data ) {
 							"minSpotColor" : "#ccc" });
 					
 					var finishLine = [[0,100], [data.score_history.length, 100]];
-					var max;
-					var scores = jQuery.extend(true, [], data.score_history)
+					var max,
+							scores = jQuery.extend(true, [], data.score_history);
 					scores.sort(function(a,b){return b-a;});
 					max = scores[0];
 					finishLineColor = (max > 100) ? "#1d0" : "#d00";
 					for(var i = 0; i < data.score_history.length; i += 1){ 
-						max = (data.score_history[i] > max) ? data.score_history[i] : max;
+						max = (data.score_history[i] >= max) ? data.score_history[i] : max;
 					} 
 					
 					jQuery(".streak-bar").sparkline( finishLine,
