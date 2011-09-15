@@ -2102,7 +2102,7 @@ function updateData( data ) {
 	var streakMaxWidth = 227,
 
 		// Streak and longest streak pixel widths
-		streakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_score) * data.score)),
+		streakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_streak) * data.streak)),
 		longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_streak) * data.longest_streak)),
 
 		// Streak icon pixel width
@@ -2114,10 +2114,29 @@ function updateData( data ) {
 		// Don't show accumulation stats higher than 100 to stop grinding behavior,
 		// and don't show labels if there isn't room in the bar to render them.
 		labelStreak = parseInt(streakWidth < labelWidthRequired ? "" :
-						( !data.summative && data.streak > 100 ) ? "Max" : data.score),
+						( !data.summative && data.streak > data.required_streak ) ? "Max" : data.streak , 10),
 
 		labelLongestStreak = ( longestStreakWidth < labelWidthRequired || (longestStreakWidth - streakWidth) < labelWidthRequired ) ? "" :
 						( !data.summative && data.longest_streak > 100 ) ? "Max" : data.longest_streak;
+
+	if ( data.momentum_scoring_used ){
+		// rescale the values to use momentum
+		// TODO really what should happen here is we should have percentages and then apply the 
+		// html element width in traditional streak situations
+		
+		streakMaxWidth -= (data.streak_display === "vehicle") ? 30 : 0;
+		
+		streakWidth = Math.min(streakMaxWidth, Math.ceil((streakMaxWidth / data.required_score) * data.score));
+
+		labelStreak = parseInt(streakWidth < labelWidthRequired ? "" :
+						( !data.summative && data.streak > data.required_streak ) ? "Max" : data.score, 10);
+
+		maxScore = Math.max.apply(null, data.score_history);
+		longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth));
+		
+		labelLongestStreak = ( longestStreakWidth < labelWidthRequired || (longestStreakWidth - streakWidth) < labelWidthRequired ) ? "" :
+						( !data.summative && data.longest_streak > 100 ) ? "Max" : data.longest_streak;
+	}
 
 	if ( data.summative && !data.hasOwnProperty("streak_display")) {
 
@@ -2149,6 +2168,8 @@ function updateData( data ) {
 		// assign the streak bar a class appropriate to the display mode
 		jQuery(".streak-bar").addClass(data.streak_display);
 		
+		console.log("data:",data)
+		
 		// some easing functions
 		jQuery.extend( jQuery.easing, {
 			easeInOutQuad: function (x, t, b, c, d) {
@@ -2162,8 +2183,9 @@ function updateData( data ) {
 		});
 		
 		if(data.streak_display === "sparkline"){
+
 			updateStreak = function(){
-				console.log(data.score_history, data);
+
 				if(data.score_history){
 					// TODO these two sparklines are effectively the same, so maybe
 					// we can reuse the object we pass in rather than literaling it
@@ -2177,9 +2199,11 @@ function updateData( data ) {
 							"spotColor" : "#0e2", 
 							"maxSpotColor" : "#0e2", 
 							"minSpotColor" : "#ccc" });
-					
+
+					// TODO this does not handle summatives well, it just 
+
 					var finishLine = [[0,data.required_score], [data.score_history.length, data.required_score]];
-					
+
 					var max = Math.max.apply(null, data.score_history);
 					finishLineColor = (max >= data.required_score) ? "#1d0" : "#d00";
 					for(var i = 0; i < data.score_history.length; i += 1){ 
@@ -2210,45 +2234,47 @@ function updateData( data ) {
 		if(data.streak_display === "vehicle"){
 			// console.log(data, "streak:", data.streak, "score", data.score)
 			
-			maxScore = Math.max.apply(null, data.score_history);
+			
 			streakIconWidth = "13px"; streakIconHeight = "28px";
 			streakFlagColor = maxScore >= data.required_score ? "#0098d0" : "#fff"/*"#6abd45"*/;
 			jQuery(".streak-icon").css( {
 				"background-color" : streakFlagColor,
 				"width" : streakIconWidth,
 				"height" : streakIconHeight } );
-			$(".current-rating").width("62px").html(parseInt(data.speed)+" MPH");
 			
-			streakMaxWidth -= 30;
-			longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth));
+			var mphLabel = data.momentum_scoring_used ? parseInt( data.speed, 10 ) : 1;
+				$(".current-rating").width("62px").html( mphLabel + " MPH");
 
 			// deal with summatives in vehicle mode
 			if(data.summative){
-				jQuery(".level-label").remove()
-				// yarr!! please remove this duplication business
+				// clean out level labels
+				jQuery(".level-label").remove();
+				// TODO yarr!! please remove this duplication business
 				var levels = [];
 				var levelCount = data.required_streak / 10;
 				for(var i = 0; i < levelCount-1; i += 1){
 					levels[ i ] = Math.ceil((i + 1) * ( streakMaxWidth / levelCount )) + 1;
 				}
-				levels.reverse()
+				// place labels in order and highlight complete ones
+				levels.reverse();
 				jQuery.each(levels, function( index, val ) {
 					jQuery( ".best-label" ).after("<li class='level-label' style='left:" + val + "px'></li>");
 				});
 				
 				var streaksAccumulated = Math.floor(data.streak / 10);
-				console.log(streaksAccumulated)
+
 				jQuery( ".level-label").width( streakIconWidth );
 				jQuery( ".level-label:lt("+streaksAccumulated+")" ).addClass( "success" );
 			}
 
 			// move the vehicle
-			jQuery(".best-label").css({ "width":"29px" }).html(labelLongestStreak).
-				animate({ "left": longestStreakWidth }, 365, "easeInOutCubic");
+			var moveto = data.momentum_scoring_used ? 
+				{ "label":labelLongestStreak, "pos":longestStreakWidth} : {"label":labelStreak, "pos":streakWidth};
+			jQuery(".best-label").css({ "width":"29px" }).html(moveto.label)
+				.animate({ "left": moveto.pos }, 365, "easeInOutCubic");
 			
 		}
 		if (data.streak_display === "streak"){
-			console.log("remember me?", data)
 			jQuery(".unit-rating").width( streakMaxWidth );
 			jQuery(".current-rating").width( streakWidth );
 			jQuery(".streak-icon").width( streakIconWidth );
