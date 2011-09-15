@@ -70,9 +70,6 @@ var primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 	// Check to see if we're in test mode
 	testMode = typeof userExercise === "undefined",
 
-	// Check to see if we're in beta mode
-	betaMode = window.location.host.indexOf( "khan-masterslave" ) !== -1,
-
 	// The main server we're connecting to for saving data
 	server = testMode ? "http://localhost:8080" : "",
 
@@ -123,8 +120,6 @@ var primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 	// For saving problems to the server
 	hintsUsed,
 	lastAction,
-	doHintSave,
-	doSave,
 	attempts,
 	once = true,
 
@@ -140,7 +135,7 @@ var primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43,
 		"issues": 0
 	},
 
-	urlBase = typeof urlBase !== "undefined" ? urlBase :
+	urlBase = typeof urlBaseOverride !== "undefined" ? urlBaseOverride :
 		testMode ? "../" : "/khan-exercises/",
 
 	lastFocusedSolutionInput = null,
@@ -272,7 +267,7 @@ var Khan = {
 				delete mod.dependencies;
 			}
 
-			if( !Khan.modules[ src ] ) {
+			if ( !Khan.modules[ src ] ) {
 				Khan.modules[ src ] = mod;
 				Khan.require( deps );
 			}
@@ -586,7 +581,7 @@ function makeProblemBag( problems, n ) {
 
 		problemCount = bag.length;
 
-	} else {
+	} else if ( problems.length > 0 ) {
 		// Collect the weights for the problems and find the total weight
 		var weights = jQuery.map( problems, function( elem, i ) {
 			elem = jQuery( elem );
@@ -690,9 +685,13 @@ function makeProblem( id, seed ) {
 	// Otherwise we grab a problem at random from the bag of problems
 	// we made earlier to ensure that every problem gets shown the
 	// appropriate number of times
-	} else {
+	} else if ( problemBag.length > 0 ) {
 		problem = problemBag[ problemBagIndex ];
 		id = problem.data( "id" );
+
+	// No valid problem was found, bail out
+	} else {
+		return;
 	}
 
 	problemID = id;
@@ -1307,9 +1306,6 @@ function makeProblem( id, seed ) {
 	// Advance to the next problem
 	nextProblem( 1 );
 
-	// The user is generating a new problem
-	doHintSave = true;
-	doSave = true;
 	hintsUsed = 0;
 	attempts = 0;
 	lastAction = (new Date).getTime();
@@ -1484,9 +1480,6 @@ function prepareSite() {
 				.removeAttr( "disabled" );
 		}
 
-		// Make sure hint streak breaking is handled correctly
-		doSave = false;
-
 		// Remember when the last action was
 		lastAction = curTime;
 
@@ -1579,21 +1572,12 @@ function prepareSite() {
 			}
 
 			hintsUsed += 1;
-
-			// Don't reset the streak if we've already reset it or if
-			// we've already sent in an answer
-			if ( doSave && doHintSave ) {
-				if (!(typeof userExercise !== "undefined" && userExercise.read_only)) {
-					request( "reset_streak" );
-				}
-
-				// Make sure we don't reset the streak more than once
-				doHintSave = false;
-			}
 		}
 
-		if (!(typeof userExercise !== "undefined" && userExercise.read_only)) {
-			// Submit data to the server
+		var fProdReadOnly = !testMode && userExercise.read_only;
+		var fAnsweredCorrectly = jQuery( "#next-question-button" ).is( ":visible" );
+		if ( !fProdReadOnly && !fAnsweredCorrectly ) {
+			// Resets the streak and logs history for exercise viewer
 			request(
 				"problems/" + (getData().total_done + 1) + "/hint",
 				buildAttemptData(false, attempts, "hint", new Date().getTime()),
@@ -1977,9 +1961,8 @@ function prepareSite() {
 		APIActionResults.register("exercise_message_html",
 			function(sExerciseMessageHtml) {
 				var jel = jQuery("#exercise-message-container");
-				var jelNew = jQuery(sExerciseMessageHtml);
-				if (jelNew.children().length) {
-					jel.empty().append(jelNew.children());
+				if (sExerciseMessageHtml !== null) {
+					jel.empty().append(sExerciseMessageHtml);
 					setTimeout(function(){ jel.slideDown(); }, 50);
 				}
 				else {
@@ -2451,7 +2434,7 @@ function loadModules() {
 			var problems = exercises.children( ".problems" ).children();
 
 			if ( typeof userExercise !== "undefined" ) {
-				problemCount = userExercise.required_streak;
+				problemCount = userExercise.required_streak || 10;
 			}
 
 			weighExercises( problems );
