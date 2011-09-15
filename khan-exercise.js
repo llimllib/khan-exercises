@@ -2178,7 +2178,7 @@ function updateData( data ) {
 							"maxSpotColor" : "#0e2", 
 							"minSpotColor" : "#ccc" });
 					
-					var finishLine = [[0,100], [data.score_history.length, data.required_score]];
+					var finishLine = [[0,data.required_score], [data.score_history.length, data.required_score]];
 					
 					var max = Math.max.apply(null, data.score_history);
 					finishLineColor = (max >= data.required_score) ? "#1d0" : "#d00";
