@@ -2127,8 +2127,8 @@ function updateData( data ) {
 
 		// Don't show accumulation stats higher than 100 to stop grinding behavior,
 		// and don't show labels if there isn't room in the bar to render them.
-		labelStreak = streakWidth < labelWidthRequired ? "" :
-						( !data.summative && data.streak > 100 ) ? "Max" : data.score,
+		labelStreak = parseInt(streakWidth < labelWidthRequired ? "" :
+						( !data.summative && data.streak > 100 ) ? "Max" : data.score),
 
 		labelLongestStreak = ( longestStreakWidth < labelWidthRequired || (longestStreakWidth - streakWidth) < labelWidthRequired ) ? "" :
 						( !data.summative && data.longest_streak > 100 ) ? "Max" : data.longest_streak;
@@ -2209,25 +2209,33 @@ function updateData( data ) {
 			}
 		}
 		if(data.streak_display === "vehicle"){
-			maxScore = Math.max.apply(null, data.score_history)
+			maxScore = Math.max.apply(null, data.score_history);
 			streakIconWidth = "13px"; streakIconHeight = "28px";
 			streakFlagColor = maxScore >= 100 ? "#0098d0" : "#6abd45";
 			jQuery(".streak-icon").css( {
 				"background-color" : streakFlagColor,
 				"width" : streakIconWidth,
 				"height" : streakIconHeight } );
+			$(".current-rating").width("62px").html(parseInt(data.speed)+" MPH");
+			
 			streakMaxWidth -= 30;
-			longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth)),
+			longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth));
 			jQuery(".best-label").css({ "width":"29px", "left": longestStreakWidth }).html(labelLongestStreak);
 		}
+		if (data.streak_display === "streak"){
+			console.log("remember me?", data)
+			jQuery(".unit-rating").width( streakMaxWidth );
+			jQuery(".current-rating").width( streakWidth );
+			jQuery(".streak-icon").width( streakIconWidth );
+			jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
+			jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
+		}
 	} else {
-		console.log( "streak_display not configured here, but maybe some day...", data);
 		jQuery(".unit-rating").width( streakMaxWidth );
 		jQuery(".current-rating").width( streakWidth );
 		jQuery(".streak-icon").width( streakIconWidth );
 		jQuery(".best-label").width( longestStreakWidth ).html( labelLongestStreak + "&nbsp;" );
 		jQuery(".current-label").width( streakWidth ).html( labelStreak + "&nbsp;" );
-		
 	}
 
 
