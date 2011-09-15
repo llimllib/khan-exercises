@@ -1324,6 +1324,9 @@ function makeProblem( id, seed ) {
 
 	jQuery(Khan).trigger( "newProblem" );
 
+	// HINT TASTIC! MARCOS REMOVE THIS DO NOT LET THIS GO THROUGH EVER
+	// jQuery( hints ).appendTo( "#hintsarea" ).runModules( problem );
+
   return answerType;
 }
 
@@ -2133,7 +2136,7 @@ function updateData( data ) {
 		labelLongestStreak = ( longestStreakWidth < labelWidthRequired || (longestStreakWidth - streakWidth) < labelWidthRequired ) ? "" :
 						( !data.summative && data.longest_streak > 100 ) ? "Max" : data.longest_streak;
 
-	if ( data.summative ) {
+	if ( data.summative && !data.hasOwnProperty("streak_display")) {
 
 		jQuery( ".summative-help ")
 			.find( ".summative-required-streaks" ).text( parseInt( data.required_streak / 10 , 10 ) ).end()
@@ -2144,6 +2147,7 @@ function updateData( data ) {
 			// Split summative streak bar into levels
 			var levels = [];
 			var levelCount = data.required_streak / 10;
+
 			for ( var i = 1; i < levelCount; i++ ) {
 
 				// Individual level pixels
@@ -2161,6 +2165,18 @@ function updateData( data ) {
 	if( data.hasOwnProperty("streak_display") ){
 		// assign the streak bar a class appropriate to the display mode
 		jQuery(".streak-bar").addClass(data.streak_display);
+		
+		// some easing functions
+		jQuery.extend( jQuery.easing, {
+			easeInOutQuad: function (x, t, b, c, d) {
+				if ((t/=d/2) < 1) return c/2*t*t + b;
+				return -c/2 * ((--t)*(t-2) - 1) + b;
+			},
+			easeInOutCubic: function (x, t, b, c, d) {
+				if ((t/=d/2) < 1) return c/2*t*t*t + b;
+				return c/2*((t-=2)*t*t + 2) + b;
+			}
+		});
 		
 		if(data.streak_display === "sparkline"){
 			updateStreak = function(){
@@ -2209,9 +2225,11 @@ function updateData( data ) {
 			}
 		}
 		if(data.streak_display === "vehicle"){
+			// console.log(data, "streak:", data.streak, "score", data.score)
+			
 			maxScore = Math.max.apply(null, data.score_history);
 			streakIconWidth = "13px"; streakIconHeight = "28px";
-			streakFlagColor = maxScore >= 100 ? "#0098d0" : "#6abd45";
+			streakFlagColor = maxScore >= data.required_score ? "#0098d0" : "#fff"/*"#6abd45"*/;
 			jQuery(".streak-icon").css( {
 				"background-color" : streakFlagColor,
 				"width" : streakIconWidth,
@@ -2220,7 +2238,31 @@ function updateData( data ) {
 			
 			streakMaxWidth -= 30;
 			longestStreakWidth = Math.min(streakMaxWidth, Math.ceil((maxScore / data.required_score) * streakMaxWidth));
-			jQuery(".best-label").css({ "width":"29px", "left": longestStreakWidth }).html(labelLongestStreak);
+
+			// deal with summatives in vehicle mode
+			if(data.summative){
+				jQuery(".level-label").remove()
+				// yarr!! please remove this duplication business
+				var levels = [];
+				var levelCount = data.required_streak / 10;
+				for(var i = 0; i < levelCount-1; i += 1){
+					levels[ i ] = Math.ceil((i + 1) * ( streakMaxWidth / levelCount )) + 1;
+				}
+				levels.reverse()
+				jQuery.each(levels, function( index, val ) {
+					jQuery( ".best-label" ).after("<li class='level-label' style='left:" + val + "px'></li>");
+				});
+				
+				var streaksAccumulated = Math.floor(data.streak / 10);
+				console.log(streaksAccumulated)
+				jQuery( ".level-label").width( streakIconWidth );
+				jQuery( ".level-label:lt("+streaksAccumulated+")" ).addClass( "success" );
+			}
+
+			// move the vehicle
+			jQuery(".best-label").css({ "width":"29px" }).html(labelLongestStreak).
+				animate({ "left": longestStreakWidth }, 365, "easeInOutCubic");
+			
 		}
 		if (data.streak_display === "streak"){
 			console.log("remember me?", data)
