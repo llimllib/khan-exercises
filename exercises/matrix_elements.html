@@ -52,6 +52,20 @@
 
             return mat + "\\end{bmatrix}";
         }
+
+        function colorColumns( rows ) {
+            var mat = "\\begin{bmatrix}";
+
+            var colors = ["red", "green", "blue", "orange", "brown"];
+
+            mat += $.map( rows, function( row ) {
+                return jQuery.map( row, function ( elt, i ) {
+                    return "\\color{" + colors[i] + "}{ " + elt + "}";
+                }).join(" & ");
+            }).join( " \\\\ " );
+
+            return mat + "\\end{bmatrix}";
+        }
     </script>
 </head>
 <body>
@@ -61,6 +75,7 @@
         <var id="COLUMNS">randRange( 2, 5 )</var>
         <var id="MATRIX">makeMat( ROWS, COLUMNS )</var>
         <var id="COLOREDROWS">colorRows( MATRIX )</var>
+        <var id="COLOREDCOLS">colorColumns( MATRIX )</var>
         <var id="SHOWMATRIX">showElements( ROWS, COLUMNS )</var>
         <var id="X">randRange( 1, ROWS )</var>
         <var id="Y">randRange( 1, COLUMNS )</var>
@@ -74,8 +89,8 @@
 			</div>
 			<div class="solution"><var>ROWS</var></div>
             <div class="hints">
-                <p>Each row has a different color in this matrix: <code><var>COLOREDROWS</var></code></p>
-            <div>
+                <p>Each row has been given a different color: <code><var>COLOREDROWS</var></code></p>
+            </div>
         </div>
         <div>
 			<div class="question">
@@ -83,6 +98,9 @@
                 <p><code><var>formatMat(MATRIX)</var></code></p>
 			</div>
 			<div class="solution"><var>COLUMNS</var></div>
+            <div class="hints">
+                <p>Each column has been given a different color: <code><var>COLOREDCOLS</var></code></p>
+            </div>
 		</div>
         <div>
             <div class="question">
