@@ -15,6 +15,10 @@
                 }
                 rows.push( row );
             }
+            return rows;
+        }
+
+        function formatMat( rows ) {
             mat = "\\begin{bmatrix}";
 
             mat += $.map( rows, function( a ) {
@@ -37,14 +41,14 @@
 		<div>
 			<div class="question">
 				<p>How many rows does this matrix have?</p>
-                <p><code><var>MATRIX</var></code></p>
+                <p><code><var>formatMat(MATRIX)</var></code></p>
 			</div>
 			<div class="solution"><var>ROWS</var></div>
         </div>
         <div>
 			<div class="question">
 				<p>How many columns does this matrix have?</p>
-                <p><code><var>MATRIX</var></code></p>
+                <p><code><var>formatMat(MATRIX)</var></code></p>
 			</div>
 			<div class="solution"><var>COLUMNS</var></div>
 		</div>
