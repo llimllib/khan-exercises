@@ -26,6 +26,18 @@
 
             return mat + "\\end{bmatrix}";
         }
+
+        function showElements( rown, coln ) {
+            var rows = [];
+            for ( var i = 1; i <= rown; i++ ) {
+                var row = []
+                for ( var j = 1; j <= coln; j++ ) {
+                    row.push("a_{"+i+","+j+"}");
+                }
+                rows.push( row );
+            }
+            return formatMat(rows);
+        }
     </script>
 </head>
 <body>
@@ -34,12 +46,13 @@
         <var id="ROWS">randRange(2, 5)</var>
         <var id="COLUMNS">randRange(2, 5)</var>
         <var id="MATRIX">makeMat(ROWS, COLUMNS)</var>
+        <var id="SHOWMATRIX">showElements(ROWS, COLUMNS)</var>
         <var id="X">randRange(1, ROWS)</var>
         <var id="Y">randRange(1, COLUMNS)</var>
 	</div>
 
 	<div class="problems">
-		<!--<div>
+		<div>
 			<div class="question">
 				<p>How many rows does this matrix have?</p>
                 <p><code><var>formatMat(MATRIX)</var></code></p>
@@ -52,16 +65,18 @@
                 <p><code><var>formatMat(MATRIX)</var></code></p>
 			</div>
 			<div class="solution"><var>COLUMNS</var></div>
-		</div>-->
+		</div>
         <div>
             <div class="question">
                 <p>What is element <code>a_{<var>X</var>,<var>Y</var>}</code> of matrix A?
                 <p><code>A = <var>formatMat(MATRIX)</var></code></p>
             </div>
             <div class="solution"><var>MATRIX[X-1][Y-1]</var></div>
+            <div class="hints">
+                <p>Here are the elements of the matrix:
+                <code><var>SHOWMATRIX</var></code></p>
+            </div>
         </div>
-	</div>
-	<div class="hints">
 	</div>
 	</div>
 </body>
