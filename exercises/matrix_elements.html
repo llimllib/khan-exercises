@@ -6,10 +6,9 @@
 	<script src="../khan-exercise.js"></script>
     <script>
         function makeMat( rown, coln ) {
-            x = 12;
-            rows = [];
+            var rows = [];
             for ( var i = 0; i < rown; i++ ) {
-                row = []
+                var row = []
                 for ( var j = 0; j < coln; j++ ) {
                     row.push(KhanUtil.randRange( 1, 100 ));
                 }
@@ -19,7 +18,7 @@
         }
 
         function formatMat( rows ) {
-            mat = "\\begin{bmatrix}";
+            var mat = "\\begin{bmatrix}";
 
             mat += $.map( rows, function( a ) {
                 return a.join(" & ");
