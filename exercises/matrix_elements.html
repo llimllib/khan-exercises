@@ -20,9 +20,9 @@
         function formatMat( rows ) {
             var mat = "\\begin{bmatrix}";
 
-            mat += $.map( rows, function( a ) {
-                return a.join(" & ");
-            }).join( " \\\\\n" );
+            mat += $.map( rows, function( row, i ) {
+                return row.join(" & ");
+            }).join( " \\\\ " );
 
             return mat + "\\end{bmatrix}";
         }
@@ -38,17 +38,32 @@
             }
             return formatMat(rows);
         }
+
+        function colorRows( rows ) {
+            var mat = "\\begin{bmatrix}";
+
+            var colors = ["red", "green", "blue", "orange", "brown"];
+
+            mat += $.map( rows, function( row, i ) {
+                return jQuery.map( row, function ( elt ) {
+                    return "\\color{" + colors[i] + "}{ " + elt + "}";
+                }).join(" & ");
+            }).join( " \\\\ " );
+
+            return mat + "\\end{bmatrix}";
+        }
     </script>
 </head>
 <body>
 	<div class="exercise">
 	<div class="vars">
-        <var id="ROWS">randRange(2, 5)</var>
-        <var id="COLUMNS">randRange(2, 5)</var>
-        <var id="MATRIX">makeMat(ROWS, COLUMNS)</var>
-        <var id="SHOWMATRIX">showElements(ROWS, COLUMNS)</var>
-        <var id="X">randRange(1, ROWS)</var>
-        <var id="Y">randRange(1, COLUMNS)</var>
+        <var id="ROWS">randRange( 2, 5 )</var>
+        <var id="COLUMNS">randRange( 2, 5 )</var>
+        <var id="MATRIX">makeMat( ROWS, COLUMNS )</var>
+        <var id="COLOREDROWS">colorRows( MATRIX )</var>
+        <var id="SHOWMATRIX">showElements( ROWS, COLUMNS )</var>
+        <var id="X">randRange( 1, ROWS )</var>
+        <var id="Y">randRange( 1, COLUMNS )</var>
 	</div>
 
 	<div class="problems">
@@ -58,6 +73,9 @@
                 <p><code><var>formatMat(MATRIX)</var></code></p>
 			</div>
 			<div class="solution"><var>ROWS</var></div>
+            <div class="hints">
+                <p>Each row has a different color in this matrix: <code><var>COLOREDROWS</var></code></p>
+            <div>
         </div>
         <div>
 			<div class="question">
