@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html data-require="math math-format">
+<head>
+	<meta charset="UTF-8" />
+	<title>Matrices 1</title>
+	<script src="../khan-exercise.js"></script>
+    <script>
+        function makeMat( rown, coln ) {
+            x = 12;
+            rows = [];
+            for ( var i = 0; i < rown; i++ ) {
+                row = []
+                for ( var j = 0; j < coln; j++ ) {
+                    row.push(KhanUtil.randRange( 1, 100 ));
+                }
+                rows.push( row );
+            }
+            mat = "\\begin{bmatrix}";
+
+            mat += $.map( rows, function( a ) {
+                return a.join(" & ");
+            }).join( " \\\\\n" );
+
+            return mat + "\\end{bmatrix}";
+        }
+    </script>
+</head>
+<body>
+	<div class="exercise">
+	<div class="vars">
+        <var id="ROWS">randRange(2, 5)</var>
+        <var id="COLUMNS">randRange(2, 5)</var>
+        <var id="MATRIX">makeMat(ROWS, COLUMNS)</var>
+	</div>
+
+	<div class="problems">
+		<div>
+			<div class="question">
+				<p>How many rows does this matrix have?</p>
+                <p><code><var>MATRIX</var></code></p>
+			</div>
+			<div class="solution"><var>ROWS</var></div>
+        </div>
+        <div>
+			<div class="question">
+				<p>How many columns does this matrix have?</p>
+                <p><code><var>MATRIX</var></code></p>
+			</div>
+			<div class="solution"><var>COLUMNS</var></div>
+		</div>
+	</div>
+	<div class="hints">
+	</div>
+	</div>
+</body>
+</html>
