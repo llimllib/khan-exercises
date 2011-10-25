@@ -21,16 +21,17 @@ jQuery.extend(KhanUtil, {
         return mat + "\\end{bmatrix}";
     },
 
-    showElements: function( rown, coln ) {
+    showElements: function( rown, coln, name ) {
+        name = name || "a";
         var rows = [];
         for ( var i = 1; i <= rown; i++ ) {
             var row = []
             for ( var j = 1; j <= coln; j++ ) {
-                row.push("a_{"+i+","+j+"}");
+                row.push(name + "_{" + i + "," + j + "}");
             }
             rows.push( row );
         }
-        return formatMat(rows);
+        return this.formatMat(rows);
     },
 
     colorRows: function( rows ) {
