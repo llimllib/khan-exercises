@@ -1,10 +1,12 @@
 jQuery.extend(KhanUtil, {
-    makeMat: function( rown, coln ) {
+    makeMat: function( rown, coln, minval, maxval ) {
+        minval = minval || 1;
+        maxval = maxval || 100;
         var rows = [];
         for ( var i = 0; i < rown; i++ ) {
             var row = []
             for ( var j = 0; j < coln; j++ ) {
-                row.push(KhanUtil.randRange( 1, 100 ));
+                row.push(KhanUtil.randRange( minval, maxval ));
             }
             rows.push( row );
         }
@@ -60,5 +62,19 @@ jQuery.extend(KhanUtil, {
         }).join( " \\\\ " );
 
         return mat + "\\end{bmatrix}";
+    },
+
+    scalarMult: function( matrix, scalar ) {
+        var rows = [];
+
+        for ( var i = 0; i < matrix.length; i++ ) {
+            var row = [];
+            for ( var j = 0; j < matrix[i].length; j++ ) {
+                row.push( matrix[i][j] * scalar );
+            }
+            rows.push(row);
+        }
+
+        return rows;
     }
 });
