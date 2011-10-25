@@ -2,17 +2,19 @@
 <html data-require="math math-format matrix">
 <head>
 	<meta charset="UTF-8" />
-	<title>Matrices 1</title>
+	<title>Scalar-Matrix Multiplication</title>
 	<script src="../khan-exercise.js"></script>
 </head>
 <body>
 	<div class="exercise">
 	<div class="vars">
-        <var id="ROWS">randRange( 2, 5 )</var>
-        <var id="COLUMNS">randRange( 2, 5 )</var>
-        <var id="MATRIX">makeMat( ROWS, COLUMNS )</var>
+        <var id="ROWS">randRange( 2, 4 )</var>
+        <var id="COLUMNS">randRange( 2, 4 )</var>
+        <var id="MATRIX">makeMat( ROWS, COLUMNS, 1, 10 )</var>
         <var id="SCALAR">randRange( 2, 5)</var>
         <var id="RESULTMATRIX">showElements( ROWS, COLUMNS, "x" )</var>
+        <var id="HINTMATRIX">showElements( ROWS, COLUMNS, "a \\cdot x" )</var>
+        <var id="CHEATMATRIX">scalarMult( MATRIX, SCALAR )</var>
         <var id="X">randRange( 1, ROWS )</var>
         <var id="Y">randRange( 1, COLUMNS )</var>
         <var id="ANSWER">MATRIX[X-1][Y-1] * SCALAR</var>
@@ -26,9 +28,14 @@
 			</div>
 			<div class="solution"><var>ANSWER</var></div>
             <div class="hints">
+                <p>To multiply a matrix by a number, multiply every element of the matrix by that number.</p>
+                <p><code>a\cdot<var>RESULTMATRIX</var> = <var>HINTMATRIX</var></p>
+                <p><code><var>SCALAR</var>\cdot<var>formatMat(MATRIX)</var>=<var>formatMat(CHEATMATRIX)</var></code></p>
             </div>
         </div>
 	</div>
 	</div>
 </body>
 </html>
+
+<!-- consistent error at http://localhost:8000/exercises/matrix_scalar_multiplication.html?debug&problem=1&seed=81049124 -->
